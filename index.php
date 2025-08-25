@@ -13,16 +13,16 @@ if (isset($_POST['login'])) {
     if ($row = mysqli_fetch_assoc($result)) {
      
         if ($password == $row['password']) {
-            // ✅ login success
+        
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['username'] = $row['username'];
             header("Location: tasks.php");
             exit;
         } else {
-            $error = "❌ Wrong Password";
+            $error = " Wrong Password";
         }
     } else {
-        $error = "❌ User not found";
+        $error = " User not found";
     }
 }
 ?>
