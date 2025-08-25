@@ -1,55 +1,52 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // agar login nahi hua to redirect
+    header("Location: index.php");
     exit;
 }
 
 $conn = mysqli_connect("localhost", "root", "", "todo_app");
 $user_id = $_SESSION['user_id'];
 
-// Add Task
 if (isset($_POST['add'])) {
-    $task = $_POST['task'];
+    $task = trim($_POST['task']);
     if ($task != "") {
+        $task = mysqli_real_escape_string($conn, $task);
         $sql = "INSERT INTO todos (user_id, task) VALUES ('$user_id', '$task')";
         mysqli_query($conn, $sql);
     }
 }
 
-// Mark Done
+
 if (isset($_GET['done'])) {
-    $id = $_GET['done'];
-    $sql = "UPDATE todos SET done=1 WHERE id='$id' AND user_id='$user_id'";
-    mysqli_query($conn, $sql);
+    $id = (int)$_GET['done'];
+    mysqli_query($conn, "UPDATE todos SET done=1 WHERE id='$id' AND user_id='$user_id'");
 }
 
-// Delete
+
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $sql = "DELETE FROM todos WHERE id='$id' AND user_id='$user_id'";
-    mysqli_query($conn, $sql);
+    $id = (int)$_GET['delete'];
+    mysqli_query($conn, "DELETE FROM todos WHERE id='$id' AND user_id='$user_id'");
 }
 
-// Get Todos
+
 $todos = mysqli_query($conn, "SELECT * FROM todos WHERE user_id='$user_id'");
 ?>
-<h2>Welcome <?= $_SESSION['username'] ?> 👋</h2>
-<a href="logout.php">Logout</a>
+
 
 <form method="post">
-    <input type="text" name="task" placeholder="Add new task">
+    <input type="text" name="task" placeholder="Add new task" required>
     <button type="submit" name="add">Add</button>
 </form>
 
 <ul>
 <?php while($row = mysqli_fetch_assoc($todos)) { ?>
     <li>
-        <?= $row['done'] ? "<s>".$row['task']."</s>" : $row['task'] ?>
+        <?= $row['done'] ? "<s>".htmlspecialchars($row['task'])."</s>" : htmlspecialchars($row['task']) ?>
         <?php if(!$row['done']) { ?>
-            <a href="?done=<?= $row['id'] ?>">✔ Done</a>
+            <a href="?done=<?= $row['id'] ?>"> Done</a>
         <?php } ?>
-        <a href="?delete=<?= $row['id'] ?>">❌ Delete</a>
+        <a href="?delete=<?= $row['id'] ?>"> Delete</a>
     </li>
 <?php } ?>
 </ul>
